@@ -2,40 +2,56 @@ import * as fs from 'node:fs';
 import * as path from 'node:path';
 import openapiTS, { astToString } from 'openapi-typescript';
 
-const SWAGGER_URL = 'https://safe-client.staging.5afe.dev/api';
+import type { OpenAPI3 } from 'openapi-typescript';
+
+const SWAGGER_URL = 'https://safe-client.safe.global/api';
 
 const SDK_FOLDER = path.join(process.cwd(), 'sdk');
 const SCHEMA_FILE = 'schema.d.ts';
-const CLIENT_FILE = 'client.ts';
+const SDK_FILE = 'sdk.ts';
 
 const WARNING = `/**
  * This file was auto-generated. Do not make direct changes.
  */`;
 
 /**
- * Main function to generate TypeScript SDK for Safe Client Gateway.
+ * Main function to generate SDK for Safe Client Gateway
  */
 async function main() {
   try {
     fs.mkdirSync(SDK_FOLDER, { recursive: true });
 
     const definitions = await scrapeSwaggerDefinitions();
-    await generateSchema(definitions);
-    generateClient();
+
+    const schema = await getSchema(definitions);
+    const client = getClient();
+    // Re-export components for import convenience
+    const components = getComponents(definitions);
+    const wrappers = getWrappers(definitions);
+
+    fs.writeFileSync(
+      path.join(SDK_FOLDER, SCHEMA_FILE),
+      [WARNING, schema, components].join('\n\n')
+    );
+    fs.writeFileSync(
+      path.join(SDK_FOLDER, SDK_FILE),
+      [WARNING, client, wrappers].join('\n\n')
+    );
 
     process.exit();
   } catch (error) {
     fs.rmSync(SDK_FOLDER, { recursive: true });
+
     throw error;
   }
 }
 main();
 
 /**
- * Scrapes Swagger definitions from the Swagger UI page.
+ * Scrapes Swagger definitions from Safe Client Gateway deployment
  * @returns Swagger definitions object
  */
-async function scrapeSwaggerDefinitions() {
+async function scrapeSwaggerDefinitions(): Promise<OpenAPI3> {
   const url = `${SWAGGER_URL}/swagger-ui-init.js`;
   const swaggerUiInit = await fetch(url).then((res) => {
     if (res.ok) {
@@ -48,7 +64,7 @@ async function scrapeSwaggerDefinitions() {
   // Extract options object from swagger-ui-init.js file
   const optionsMatch = swaggerUiInit.match(/let options = (\{[\s\S]*?\});/);
   if (!optionsMatch || !optionsMatch[1]) {
-    throw new Error('Failed to find options object');
+    throw new Error('No options object');
   }
 
   const options = JSON.parse(optionsMatch[1]);
@@ -56,43 +72,121 @@ async function scrapeSwaggerDefinitions() {
 }
 
 /**
- * Generates/writes Swagger schema to a file.
- * @param definitions Swagger definitions object
+ * Converts Swagger definitions to TypeScript schema
+ * @param definitions - Swagger definitions object
+ * @returns TypeScript schema
  */
-async function generateSchema(definitions: any) {
-  const schema = await openapiTS(definitions).then(astToString);
+async function getSchema(definitions: OpenAPI3): Promise<string> {
+  return openapiTS(definitions).then(astToString);
+}
 
-  const components = Object.keys(definitions.components.schemas)
+/**
+ * Directly exports components of Swagger definitions
+ * @param definitions - Swagger definitions object
+ * @returns Components of TypeScript schema
+ */
+function getComponents(definitions: OpenAPI3): string {
+  if (!definitions.components || !definitions.components.schemas) {
+    throw new Error('Failed to find components.schemas object');
+  }
+
+  return Object.keys(definitions.components.schemas)
     .map((key) => {
       return `export type ${key} = components["schemas"]["${key}"];`;
     })
     .join('\n');
-
-  const data = [
-    WARNING,
-    schema,
-    `/**
- * Re-export components for import convenience.
- */`,
-    components,
-  ].join('\n');
-
-  const file = path.join(SDK_FOLDER, SCHEMA_FILE);
-  fs.writeFileSync(file, data);
 }
 
 /**
- * Generates/writes typed client factory to a file.
+ * Factory for Safe Client Gateway-typed client and singleton
+ * @returns - Typed factory and singleton
  */
-function generateClient() {
+function getClient(): string {
   const imports = [
     "import _createClient from 'openapi-fetch';",
-    `import type { paths } from './${SCHEMA_FILE}';`,
+    `import type { paths, operations } from './${SCHEMA_FILE}';`,
   ];
-  const client = `export const createClient = _createClient<paths>`;
 
-  const data = [WARNING, ...imports, client].join('\n\n');
+  // Typed factory, singleton, singleton getter, singleton URL updater
+  const client = [
+    'const createClient = _createClient<paths>;',
+    `let _client = createClient({
+  baseUrl: '${SWAGGER_URL}',
+})`,
+    `export function getClient() {
+  return _client
+}`,
+    `export function setBaseUrl(baseUrl: string) {
+  _client = createClient({ baseUrl });
+}`,
+  ];
 
-  const file = path.join(SDK_FOLDER, CLIENT_FILE);
-  fs.writeFileSync(file, data);
+  return [...imports, ...client].join('\n\n');
+}
+
+/**
+ * Path-specific wrappers for fetching from the Safe Client Gateway
+ * @param definitions - Swagger definitions object
+ * @returns - Wrapper functions for each path
+ */
+function getWrappers(definitions: OpenAPI3): string {
+  return Object.keys(definitions.paths ?? {})
+    .map((path) => {
+      const pathItemObject = definitions.paths?.[path];
+      if (!pathItemObject) {
+        throw new Error('No path(s) in definitions');
+      }
+
+      // get, post, put, etc.
+      const [fetchMethod] = Object.keys(pathItemObject);
+      if (!fetchMethod || !hasKey(pathItemObject, fetchMethod)) {
+        throw new Error(`No fetch method for ${path}`);
+      }
+
+      const operationObject = pathItemObject[fetchMethod];
+
+      // AboutController_getAbout
+      const operationId = operationObject.operationId;
+      // ['AboutController, 'getAbout']
+      const [controller, _method] = operationId.split('_');
+
+      // Prevent duplicated by appending controller version to method
+      const method = (() => {
+        const version = controller.match(/v\d+/i);
+        return version ? _method + version : _method;
+      })();
+
+      // Wrapper types
+      const parameterTypes = `operations["${operationId}"]["parameters"]`;
+      // requestBody only present if sending body is possible
+      const bodyTypes = operationObject?.requestBody
+        ? `operations["${operationId}"]["requestBody"]['content']['application/json']`
+        : undefined;
+
+      // Wrapper args and corresponding for client
+      const wrapperArgs = bodyTypes
+        ? `params: ${parameterTypes}, body: ${bodyTypes}`
+        : `params: ${parameterTypes}`;
+      const clientArgs = bodyTypes ? `params, body` : `params`;
+
+      // Wrapper function
+      return `export async function ${method}(${wrapperArgs}) {
+  return _client.${fetchMethod.toUpperCase()}('${path}', { ${clientArgs} });
+}`;
+    })
+    .filter(Boolean)
+    .join('\n\n');
+}
+
+/**
+ * Type-safe helper to ensure key is present in object
+ * @param obj - Object to check keyof
+ * @param key - Key to check presence of
+ * @returns - True if {@link key} is in {@link obj}
+ */
+function hasKey<T extends object, K extends PropertyKey>(
+  obj: T,
+  key: K
+): key is K & keyof T {
+  return key in obj;
 }

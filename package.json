@@ -5,11 +5,11 @@
     "@types/node": "^22.0.2",
     "openapi-fetch": "^0.10.5",
     "openapi-typescript": "^7.2.0",
+    "prettier": "^3.3.3",
     "tsx": "^4.16.5",
     "typescript": "^5.5.4"
   },
   "scripts": {
-    "sdk": "tsx scripts/sdk.ts",
-    "postinstall": "npm run sdk"
+    "sdk": "tsx scripts/sdk.ts && prettier --write sdk/*.ts"
   }
 }
