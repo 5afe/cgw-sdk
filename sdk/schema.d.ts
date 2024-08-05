@@ -19,6 +19,102 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/v1/accounts": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations["AccountsController_createAccount"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/accounts/data-types": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["AccountsController_getDataTypes"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/accounts/{address}/data-settings": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["AccountsController_getAccountDataSettings"];
+    put: operations["AccountsController_upsertAccountDataSettings"];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/accounts/{address}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["AccountsController_getAccount"];
+    put?: never;
+    post?: never;
+    delete: operations["AccountsController_deleteAccount"];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/accounts/{address}/counterfactual-safes/{chainId}/{predictedAddress}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["CounterfactualSafesController_getCounterfactualSafe"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/accounts/{address}/counterfactual-safes": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put: operations["CounterfactualSafesController_createCounterfactualSafe"];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/v1/chains/{chainId}/safes/{safeAddress}/balances/{fiatCode}": {
     parameters: {
       query?: never;
@@ -354,6 +450,70 @@ export interface paths {
     post?: never;
     /** @deprecated */
     delete: operations["DelegatesController_deleteSafeDelegate"];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v2/chains/{chainId}/delegates": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["DelegatesV2Controller_getDelegates"];
+    put?: never;
+    post: operations["DelegatesV2Controller_postDelegate"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v2/chains/{chainId}/delegates/{delegateAddress}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    delete: operations["DelegatesV2Controller_deleteDelegate"];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/chains/{chainId}/safes/{safeAddress}/recovery": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations["RecoveryController_addRecoveryModule"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/chains/{chainId}/safes/{safeAddress}/recovery/{moduleAddress}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    delete: operations["RecoveryController_deleteRecoveryModule"];
     options?: never;
     head?: never;
     patch?: never;
@@ -788,6 +948,50 @@ export interface components {
       version?: string | null;
       buildNumber?: string | null;
     };
+    CreateAccountDto: {
+      address: string;
+    };
+    Account: {
+      id: string;
+      groupId?: string | null;
+      address: string;
+    };
+    AccountDataType: {
+      id: string;
+      name: string;
+      description?: string | null;
+      isActive: boolean;
+    };
+    AccountDataSetting: {
+      dataTypeId: string;
+      enabled: boolean;
+    };
+    UpsertAccountDataSettingDto: {
+      dataTypeId: string;
+      enabled: boolean;
+    };
+    UpsertAccountDataSettingsDto: {
+      accountDataSettings: components["schemas"]["UpsertAccountDataSettingDto"][];
+    };
+    CounterfactualSafe: {
+      chainId: string;
+      creator: string;
+      fallbackHandler: string;
+      owners: string[];
+      predictedAddress: string;
+      saltNonce: string;
+      singletonAddress: string;
+      threshold: number;
+    };
+    CreateCounterfactualSafeDto: {
+      chainId: string;
+      fallbackHandler: string;
+      owners: string[];
+      predictedAddress: string;
+      saltNonce: string;
+      singletonAddress: string;
+      threshold: number;
+    };
     Token: {
       address: string;
       decimals?: number | null;
@@ -1063,6 +1267,14 @@ export interface components {
       delegate: string;
       safe: string;
       signature: string;
+    };
+    DeleteDelegateV2Dto: {
+      delegator?: Record<string, never>;
+      safe?: Record<string, never>;
+      signature: string;
+    };
+    AddRecoveryModuleDto: {
+      moduleAddress: string;
     };
     GetEstimationDto: {
       to: string;
@@ -1456,7 +1668,9 @@ export interface components {
       /** @enum {string} */
       kind: "buy" | "sell" | "unknown";
       /** @enum {string} */
-      class: "market" | "limit" | "liquidity" | "unknown";
+      class?: "market" | "limit" | "liquidity" | "unknown";
+      /** @description The order UID of the active order, or null if none is active */
+      activeOrderUid: Record<string, never>;
       /** @description The timestamp when the TWAP expires */
       validUntil: number;
       /** @description The sell token raw amount (no decimals) */
@@ -1695,6 +1909,182 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["About"];
+        };
+      };
+    };
+  };
+  AccountsController_createAccount: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateAccountDto"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Account"];
+        };
+      };
+    };
+  };
+  AccountsController_getDataTypes: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AccountDataType"][];
+        };
+      };
+    };
+  };
+  AccountsController_getAccountDataSettings: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        address: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AccountDataSetting"][];
+        };
+      };
+    };
+  };
+  AccountsController_upsertAccountDataSettings: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        address: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpsertAccountDataSettingsDto"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AccountDataSetting"][];
+        };
+      };
+    };
+  };
+  AccountsController_getAccount: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        address: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Account"];
+        };
+      };
+    };
+  };
+  AccountsController_deleteAccount: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        address: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  CounterfactualSafesController_getCounterfactualSafe: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        address: string;
+        chainId: string;
+        predictedAddress: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["CounterfactualSafe"];
+        };
+      };
+    };
+  };
+  CounterfactualSafesController_createCounterfactualSafe: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        address: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateCounterfactualSafeDto"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["CounterfactualSafe"];
         };
       };
     };
@@ -2183,6 +2573,125 @@ export interface operations {
     };
     responses: {
       200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  DelegatesV2Controller_getDelegates: {
+    parameters: {
+      query?: {
+        safe?: string;
+        delegate?: string;
+        delegator?: string;
+        label?: string;
+        cursor?: string;
+      };
+      header?: never;
+      path: {
+        chainId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["DelegatePage"];
+        };
+      };
+    };
+  };
+  DelegatesV2Controller_postDelegate: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        chainId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateDelegateDto"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  DelegatesV2Controller_deleteDelegate: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        chainId: string;
+        delegateAddress: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["DeleteDelegateV2Dto"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  RecoveryController_addRecoveryModule: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        chainId: string;
+        safeAddress: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["AddRecoveryModuleDto"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  RecoveryController_deleteRecoveryModule: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        chainId: string;
+        moduleAddress: string;
+        safeAddress: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      204: {
         headers: {
           [name: string]: unknown;
         };
@@ -2843,6 +3352,17 @@ export interface operations {
 }
 
 export type About = components["schemas"]["About"];
+export type CreateAccountDto = components["schemas"]["CreateAccountDto"];
+export type Account = components["schemas"]["Account"];
+export type AccountDataType = components["schemas"]["AccountDataType"];
+export type AccountDataSetting = components["schemas"]["AccountDataSetting"];
+export type UpsertAccountDataSettingDto =
+  components["schemas"]["UpsertAccountDataSettingDto"];
+export type UpsertAccountDataSettingsDto =
+  components["schemas"]["UpsertAccountDataSettingsDto"];
+export type CounterfactualSafe = components["schemas"]["CounterfactualSafe"];
+export type CreateCounterfactualSafeDto =
+  components["schemas"]["CreateCounterfactualSafeDto"];
 export type Token = components["schemas"]["Token"];
 export type Balance = components["schemas"]["Balance"];
 export type Balances = components["schemas"]["Balances"];
@@ -2886,6 +3406,9 @@ export type CreateDelegateDto = components["schemas"]["CreateDelegateDto"];
 export type DeleteDelegateDto = components["schemas"]["DeleteDelegateDto"];
 export type DeleteSafeDelegateDto =
   components["schemas"]["DeleteSafeDelegateDto"];
+export type DeleteDelegateV2Dto = components["schemas"]["DeleteDelegateV2Dto"];
+export type AddRecoveryModuleDto =
+  components["schemas"]["AddRecoveryModuleDto"];
 export type GetEstimationDto = components["schemas"]["GetEstimationDto"];
 export type EstimationResponse = components["schemas"]["EstimationResponse"];
 export type AddressInfo = components["schemas"]["AddressInfo"];

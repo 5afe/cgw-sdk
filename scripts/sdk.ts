@@ -4,7 +4,7 @@ import openapiTS, { astToString } from 'openapi-typescript';
 
 import type { OpenAPI3 } from 'openapi-typescript';
 
-const SWAGGER_URL = 'https://safe-client.safe.global/api';
+const SWAGGER_URL = 'https://safe-client.staging.5afe.dev/api';
 
 const SDK_FOLDER = path.join(process.cwd(), 'sdk');
 const SCHEMA_FILE = 'schema.d.ts';
@@ -63,7 +63,7 @@ async function scrapeSwaggerDefinitions(): Promise<OpenAPI3> {
 
   // Extract options object from swagger-ui-init.js file
   const optionsMatch = swaggerUiInit.match(/let options = (\{[\s\S]*?\});/);
-  if (!optionsMatch || !optionsMatch[1]) {
+  if (!optionsMatch?.[1]) {
     throw new Error('No options object');
   }
 
@@ -152,8 +152,8 @@ function getWrappers(definitions: OpenAPI3): string {
 
       // Prevent duplicated by appending controller version to method
       const method = (() => {
-        const version = controller.match(/v\d+/i);
-        return version ? _method + version : _method;
+        const versionMatch = controller.match(/v\d+/i);
+        return versionMatch?.[0] ? _method + versionMatch[0] : _method;
       })();
 
       // Wrapper types
