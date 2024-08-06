@@ -26,6 +26,46 @@ export async function getAbout(
   return _client.GET("/about", { params });
 }
 
+export async function createAccount(
+  params: operations["AccountsController_createAccount"]["parameters"],
+  body: operations["AccountsController_createAccount"]["requestBody"]["content"]["application/json"],
+) {
+  return _client.POST("/v1/accounts", { params, body });
+}
+
+export async function getDataTypes(
+  params: operations["AccountsController_getDataTypes"]["parameters"],
+) {
+  return _client.GET("/v1/accounts/data-types", { params });
+}
+
+export async function getAccountDataSettings(
+  params: operations["AccountsController_getAccountDataSettings"]["parameters"],
+) {
+  return _client.GET("/v1/accounts/{address}/data-settings", { params });
+}
+
+export async function getAccount(
+  params: operations["AccountsController_getAccount"]["parameters"],
+) {
+  return _client.GET("/v1/accounts/{address}", { params });
+}
+
+export async function getCounterfactualSafe(
+  params: operations["CounterfactualSafesController_getCounterfactualSafe"]["parameters"],
+) {
+  return _client.GET(
+    "/v1/accounts/{address}/counterfactual-safes/{chainId}/{predictedAddress}",
+    { params },
+  );
+}
+
+export async function getCounterfactualSafes(
+  params: operations["CounterfactualSafesController_getCounterfactualSafes"]["parameters"],
+) {
+  return _client.GET("/v1/accounts/{address}/counterfactual-safes", { params });
+}
+
 export async function getBalances(
   params: operations["BalancesController_getBalances"]["parameters"],
 ) {
@@ -172,6 +212,41 @@ export async function deleteSafeDelegate(
   return _client.DELETE(
     "/v1/chains/{chainId}/safes/{safeAddress}/delegates/{delegateAddress}",
     { params, body },
+  );
+}
+
+export async function getDelegatesV2(
+  params: operations["DelegatesV2Controller_getDelegates"]["parameters"],
+) {
+  return _client.GET("/v2/chains/{chainId}/delegates", { params });
+}
+
+export async function deleteDelegateV2(
+  params: operations["DelegatesV2Controller_deleteDelegate"]["parameters"],
+  body: operations["DelegatesV2Controller_deleteDelegate"]["requestBody"]["content"]["application/json"],
+) {
+  return _client.DELETE("/v2/chains/{chainId}/delegates/{delegateAddress}", {
+    params,
+    body,
+  });
+}
+
+export async function addRecoveryModule(
+  params: operations["RecoveryController_addRecoveryModule"]["parameters"],
+  body: operations["RecoveryController_addRecoveryModule"]["requestBody"]["content"]["application/json"],
+) {
+  return _client.POST("/v1/chains/{chainId}/safes/{safeAddress}/recovery", {
+    params,
+    body,
+  });
+}
+
+export async function deleteRecoveryModule(
+  params: operations["RecoveryController_deleteRecoveryModule"]["parameters"],
+) {
+  return _client.DELETE(
+    "/v1/chains/{chainId}/safes/{safeAddress}/recovery/{moduleAddress}",
+    { params },
   );
 }
 
