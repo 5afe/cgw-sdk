@@ -1,18 +1,19 @@
 {
   "compilerOptions": {
-    "allowSyntheticDefaultImports": true,
-    "declaration": true,
-    "downlevelIteration": false,
     "esModuleInterop": true,
-    "lib": ["ESNext", "DOM"],
-    "module": "ESNext",
-    "moduleResolution": "Bundler",
-    "noUncheckedIndexedAccess": true,
-    "outDir": "dist",
-    "skipLibCheck": false,
+    "skipLibCheck": true,
+    "target": "es2022",
+    "allowJs": true,
+    "resolveJsonModule": true,
+    "moduleDetection": "force",
+    "isolatedModules": true,
+    "verbatimModuleSyntax": true,
     "strict": true,
-    "target": "ESNext"
-  },
-  "include": ["dist", "scripts"],
-  "exclude": ["node_modules"]
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    "module": "NodeNext",
+    "sourceMap": true,
+    "declaration": true,
+    "lib": ["es2022"]
+  }
 }
