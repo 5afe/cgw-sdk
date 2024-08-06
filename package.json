@@ -1,7 +1,7 @@
 {
   "license": "MIT",
   "type": "module",
-  "devDependencies": {
-    "openapi-fetch": "^0.10.5"
+  "dependencies": {
+    "openapi-fetch": "0.10.5"
   }
 }
