@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "outDir": "dist",
     "esModuleInterop": true,
     "skipLibCheck": true,
     "target": "es2022",
@@ -15,5 +16,7 @@
     "sourceMap": true,
     "declaration": true,
     "lib": ["es2022"]
-  }
+  },
+  "include": ["src"],
+  "exclude": ["dist", "node_modules"]
 }

@@ -7,11 +7,14 @@
   "files": [
     "dist"
   ],
-  "dependencies": {
-    "openapi-fetch": "0.10.5",
-    "cgw-sdk": "git+https://github.com/5afe/cgw-sdk.git"
-  },
   "scripts": {
-    "build": "rm -rf dist && tsc"
+    "build": "rm -rf dist && tsc && prettier --ignore-path .prettierignore -w 'dist/**/*'"
+  },
+  "dependencies": {
+    "openapi-fetch": "0.10.5"
+  },
+  "devDependencies": {
+    "prettier": "^3.3.3",
+    "typescript": "^5.5.4"
   }
 }
