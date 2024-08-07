@@ -2,7 +2,16 @@
   "license": "MIT",
   "type": "module",
   "version": "2.0.3",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
   "dependencies": {
-    "openapi-fetch": "0.10.5"
+    "openapi-fetch": "0.10.5",
+    "cgw-sdk": "git+https://github.com/5afe/cgw-sdk.git"
+  },
+  "scripts": {
+    "build": "rm -rf dist && tsc"
   }
 }
